@@ -297,7 +297,7 @@ class MainWindow(QMainWindow):
         dst: Path
 
         refresh = False
-        dst = Path('//resources')  # TODO: change this
+        dst = Path('resources')
         extant_resources = os.listdir(dst)
 
         files, _ = QFileDialog.getOpenFileNames(
@@ -471,13 +471,11 @@ class MainWindow(QMainWindow):
     @staticmethod
     def _get_dictionary_items(to_load: DictionaryType) -> list[str]:
         dictionaries: DirectoryContents
-        abs_path: Path
         path: Path
 
-        abs_path = Path('/')
-        path = Path(abs_path, 'resources' if to_load == DictionaryType.AVAILABLE else 'dictionaries')
+        path = Path('resources' if to_load == DictionaryType.AVAILABLE else 'dictionaries')
 
-        dictionaries = DirectoryContents([Path(path, item) for item in os.listdir(path)])  # TODO: fix this later
+        dictionaries = DirectoryContents([Path(path, item) for item in os.listdir(path)])
         dictionaries.clear_except('.txt')
 
         return [item.name for item in dictionaries]

@@ -4,6 +4,7 @@ from pathlib import Path, PosixPath
 from utils.status import warn, info
 import re
 from utils.error import error_dispatcher
+from glob import glob
 
 
 class DirectoryContents(list):
@@ -87,7 +88,7 @@ def delete(path: Path) -> bool:
         return not os.path.exists(path)
 
 
-def read(path: Path, multi: bool) -> list[str] | str:
+def read(path: Path, multi: bool = False) -> list[str] | str:
     with open(path, 'r') as f:
         return f.readlines() if multi else f.read()
 
@@ -121,3 +122,8 @@ def is_filetype(path: Path, filetypes: list[str]) -> bool:
 
 def is_directory(path: Path) -> bool:
     return path.is_dir()
+
+
+def filetype_in_directory(path: Path, filetype: str) -> bool:
+    files = os.path.join(path, f"*{filetype}")
+    return len(glob(files)) > 0

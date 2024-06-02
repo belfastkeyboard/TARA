@@ -9,6 +9,11 @@ NAME: str = "TARA"
 
 def main() -> None:
 
+    # TODO:
+    # 1. correctly load dictionaries from /dictionaries
+    # 2. gracefully handle cases where dictionaries not found
+    # 3. when processing files, change screen
+
     interface_init(NAME, VERSION)
 
     return
@@ -16,4 +21,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-

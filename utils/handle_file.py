@@ -67,7 +67,6 @@ def file_process_text(path: Path) -> None:
 def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True) -> None:
     images: DirectoryContents
     texts: list[str]
-    spellchecker: Spellchecker
     doc: Path
     document: Path
 
@@ -81,8 +80,14 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
         texts = ocr.get_text_batch(images)
 
         if spellcheck:
-            spellchecker = Spellchecker()
-            texts = spellchecker.spellcheck_batch(texts)
+            with Spellchecker() as check:
+                if check.loaded:
+                    texts = check.spellcheck_batch(texts)
+                else:
+                    error_dispatcher.raise_error(
+                        "No dictionaries loaded!",
+                        "No dictionaries have been loaded.\nUse the 'Dictionary' tab to load dictionaries."
+                    )
 
         document = Path(path.parent, f"{path.stem}.txt")
         write(texts, document, 'w')
@@ -128,11 +133,11 @@ def discern_type_all(path: Path) -> None:
 
 def discern_type_scan(path: Path) -> None:
     if is_filetype(path, ['.jpg', '.png']):
-        file_process_image(path, spellcheck=False)  # TODO: scan only version (parameter?)
+        file_process_image(path, spellcheck=False)
     elif is_filetype(path, ['.pdf']):
-        file_process_document(path, spellcheck=False)  # TODO: scan only version (parameter?)
+        file_process_document(path, spellcheck=False)
     elif is_directory(path):
-        file_handle_directory(path, ProcessType.SCAN)  # TODO: scan only version (parameter?)
+        file_handle_directory(path, ProcessType.SCAN)
     else:
         file_not_accepted(path)
 

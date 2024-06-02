@@ -24,7 +24,7 @@ class Processes(QMainWindow):
             for file in files:
                 path = Path(file)
                 if not discern_type_all(path):
-                    error_dispatcher.raise_error()
+                    error_dispatcher.raise_error()  # what's going on with this syntax?
 
         return
 

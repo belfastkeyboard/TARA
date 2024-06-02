@@ -241,3 +241,6 @@ fabric.properties
 
 # Project specific dictionaries backed up in hidden folder called .backup/
 .backup/
+
+# Directory for storing test resources
+test/
