@@ -1,0 +1,6 @@
+word then 10000
+space then 9999
+frequency for 9998
+bigram dictionary 9997
+it's for 9996
+word pairings 9995

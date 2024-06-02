@@ -1,0 +1,4 @@
+word 10000
+space 9999
+then 9998
+frequency 9997
