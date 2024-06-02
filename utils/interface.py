@@ -276,7 +276,7 @@ class MainWindow(QMainWindow):
         dict_list = self.findChild(QListWidget, 'ListDictAvail')
         dictionary = dict_list.selectedItems()
         for item in dictionary:
-            filepath = os.path.join('/home/riain/PycharmProjects/OCR/resources', item.text())
+            filepath = os.path.join('//resources', item.text())
             QDesktopServices.openUrl(QUrl.fromLocalFile(filepath))
 
         return
@@ -285,7 +285,7 @@ class MainWindow(QMainWindow):
         dict_list = self.findChild(QListWidget, 'ListDictLoad')
         dictionary = dict_list.selectedItems()
         for item in dictionary:
-            filepath = os.path.join('/home/riain/PycharmProjects/OCR/dictionaries', item.text())
+            filepath = os.path.join('//dictionaries', item.text())
             QDesktopServices.openUrl(QUrl.fromLocalFile(filepath))
 
         return
@@ -297,7 +297,7 @@ class MainWindow(QMainWindow):
         dst: Path
 
         refresh = False
-        dst = Path('/home/riain/PycharmProjects/OCR/resources')  # TODO: change this
+        dst = Path('//resources')  # TODO: change this
         extant_resources = os.listdir(dst)
 
         files, _ = QFileDialog.getOpenFileNames(
@@ -349,7 +349,7 @@ class MainWindow(QMainWindow):
             return
 
         for item in dictionary:
-            filepath = Path('/home/riain/PycharmProjects/OCR/resources', item.text())
+            filepath = Path('//resources', item.text())
             refresh = delete(filepath)
 
         if refresh:
@@ -362,8 +362,8 @@ class MainWindow(QMainWindow):
         dst: Path
         extant_dictionaries: list[str]
 
-        src = Path('/home/riain/PycharmProjects/OCR/resources')
-        dst = Path('/home/riain/PycharmProjects/OCR/dictionaries')
+        src = Path('//resources')
+        dst = Path('//dictionaries')
 
         dict_list = self.findChild(QListWidget, 'ListDictAvail')
         dictionary = dict_list.selectedItems()
@@ -394,8 +394,8 @@ class MainWindow(QMainWindow):
         dst: Path
         extant_resources: list[str]
 
-        src = Path('/home/riain/PycharmProjects/OCR/dictionaries')
-        dst = Path('/home/riain/PycharmProjects/OCR/resources')
+        src = Path('//dictionaries')
+        dst = Path('//resources')
 
         dict_list = self.findChild(QListWidget, 'ListDictLoad')
         dictionary = dict_list.selectedItems()
@@ -474,7 +474,7 @@ class MainWindow(QMainWindow):
         abs_path: Path
         path: Path
 
-        abs_path = Path('/home/riain/PycharmProjects/OCR')
+        abs_path = Path('/')
         path = Path(abs_path, 'resources' if to_load == DictionaryType.AVAILABLE else 'dictionaries')
 
         dictionaries = DirectoryContents([Path(path, item) for item in os.listdir(path)])  # TODO: fix this later

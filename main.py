@@ -10,7 +10,6 @@ NAME: str = "TARA"
 def main() -> None:
 
     interface_init(NAME, VERSION)
-    """ then add a help menu explaining the functionality """
 
     return
 

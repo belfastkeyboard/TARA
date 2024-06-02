@@ -1,0 +1,7 @@
+pytesseract~=0.3.10
+pillow~=10.3.0
+pdf2image~=1.17.0
+PyQt5~=5.15.10
+SymSpellCppPy~=0.0.18
+opencv-python~=4.9.0.80
+numpy~=1.26.4
