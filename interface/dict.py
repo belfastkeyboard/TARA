@@ -9,16 +9,20 @@ from utils.error import error_dispatcher
 
 from .util import DictionaryType
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = SCRIPT_DIR.parent
+RESOURCES_DIR = Path(PROJECT_DIR, 'resources')
+DICTIONARY_DIR = Path(PROJECT_DIR, 'dictionaries')
+
 
 class DictionaryMethods(QMainWindow):
 
     def _open_dictionary_avail(self) -> None:
         dict_list = self.findChild(QListWidget, 'ListDictAvail')
         dictionary = dict_list.selectedItems()
-        src = 'resources'
 
         for item in dictionary:
-            filepath = os.path.join(src, item.text())
+            filepath = os.path.join(RESOURCES_DIR, item.text())
             QDesktopServices.openUrl(QUrl.fromLocalFile(filepath))
 
         return
@@ -26,10 +30,9 @@ class DictionaryMethods(QMainWindow):
     def _open_dictionary_load(self) -> None:
         dict_list = self.findChild(QListWidget, 'ListDictLoad')
         dictionary = dict_list.selectedItems()
-        src = 'dictionaries'
 
         for item in dictionary:
-            filepath = os.path.join(src, item.text())
+            filepath = os.path.join(DICTIONARY_DIR, item.text())
             QDesktopServices.openUrl(QUrl.fromLocalFile(filepath))
 
         return
@@ -38,11 +41,9 @@ class DictionaryMethods(QMainWindow):
         refresh: bool
         response: QMessageBox
         extant_resources: list[str]
-        dst: Path
 
         refresh = False
-        dst = Path('resources')
-        extant_resources = os.listdir(dst)
+        extant_resources = os.listdir(RESOURCES_DIR)
 
         files, _ = QFileDialog.getOpenFileNames(
             self,
@@ -63,10 +64,10 @@ class DictionaryMethods(QMainWindow):
                             self, 'Overwrite',
                             f"'{path.name}' already exists. Overwrite file?"
                         ) == QMessageBox.Yes:
-                            copy(path, dst)
+                            copy(path, RESOURCES_DIR)
                             refresh = True
                     else:
-                        copy(path, dst)
+                        copy(path, RESOURCES_DIR)
                         refresh = True
 
         if refresh:
@@ -80,7 +81,6 @@ class DictionaryMethods(QMainWindow):
 
         dict_list = self.findChild(QListWidget, 'ListDictAvail')
         dictionary = dict_list.selectedItems()
-        src = 'resources'
 
         if not dictionary:
             return
@@ -94,7 +94,7 @@ class DictionaryMethods(QMainWindow):
             return
 
         for item in dictionary:
-            filepath = Path(src, item.text())
+            filepath = Path(RESOURCES_DIR, item.text())
             refresh = delete(filepath)
 
         if refresh:
@@ -103,16 +103,11 @@ class DictionaryMethods(QMainWindow):
         return
 
     def _load_dictionary(self) -> None:
-        src: Path
-        dst: Path
         extant_dictionaries: list[str]
-
-        src = Path('resources')
-        dst = Path('dictionaries')
 
         dict_list = self.findChild(QListWidget, 'ListDictAvail')
         dictionary = dict_list.selectedItems()
-        extant_dictionaries = os.listdir(dst)
+        extant_dictionaries = os.listdir(DICTIONARY_DIR)
 
         if not dictionary:
             return
@@ -124,27 +119,22 @@ class DictionaryMethods(QMainWindow):
                         self, 'Overwrite',
                         f"'{path.name}' already exists. Overwrite file?"
                 ) == QMessageBox.Yes:
-                    filepath = Path(src, path)
-                    move(filepath, dst, overwrite=True)
+                    filepath = Path(RESOURCES_DIR, path)
+                    move(filepath, DICTIONARY_DIR, overwrite=True)
             else:
-                filepath = Path(src, path)
-                move(filepath, dst)
+                filepath = Path(RESOURCES_DIR, path)
+                move(filepath, DICTIONARY_DIR)
 
         self._refresh_lists()
 
         return
 
     def _unload_dictionary(self) -> None:
-        src: Path
-        dst: Path
         extant_resources: list[str]
-
-        src = Path('dictionaries')
-        dst = Path('resources')
 
         dict_list = self.findChild(QListWidget, 'ListDictLoad')
         dictionary = dict_list.selectedItems()
-        extant_resources = os.listdir(dst)
+        extant_resources = os.listdir(RESOURCES_DIR)
 
         if not dictionary:
             return
@@ -156,11 +146,11 @@ class DictionaryMethods(QMainWindow):
                         self, 'Overwrite',
                         f"'{path.name}' already exists. Overwrite file?"
                 ) == QMessageBox.Yes:
-                    filepath = Path(src, path)
-                    move(filepath, dst, overwrite=True)
+                    filepath = Path(DICTIONARY_DIR, path)
+                    move(filepath, RESOURCES_DIR, overwrite=True)
             else:
-                filepath = Path(src, item.text())
-                move(filepath, dst, overwrite=True)
+                filepath = Path(DICTIONARY_DIR, item.text())
+                move(filepath, RESOURCES_DIR, overwrite=True)
 
         self._refresh_lists()
 

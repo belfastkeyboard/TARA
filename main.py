@@ -10,7 +10,7 @@ NAME: str = "TARA"
 def main() -> None:
 
     # TODO:
-    # 1. when processing files, change screen
+    #   1. when processing files, change screen
 
     interface_init(NAME, VERSION)
 
