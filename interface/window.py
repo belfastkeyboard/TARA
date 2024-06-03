@@ -1,18 +1,18 @@
 import os
 from pathlib import Path
 
-from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
 from utils.error import error_dispatcher
-from utils.system import DirectoryContents
 from utils.status import info
+from utils.system import DirectoryContents
 
-from .util import DictionaryType
-from .menu import TopBarMenu
-from .tabs import TopBarTabs
 from .dict import DictionaryMethods
+from .menu import TopBarMenu
 from .process import Processes
+from .tabs import TopBarTabs
+from .util import DictionaryType
 
 
 class MainWindow(TopBarMenu, TopBarTabs, DictionaryMethods, Processes):

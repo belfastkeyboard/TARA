@@ -1,12 +1,12 @@
 import os
 from pathlib import Path
 
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QListWidget, QMessageBox, QFileDialog
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtWidgets import QFileDialog, QListWidget, QMainWindow, QMessageBox, QPushButton
 
-from utils.system import move, delete, copy, is_filetype
 from utils.error import error_dispatcher
+from utils.system import copy, delete, is_filetype, move
 
 from .util import DictionaryType
 

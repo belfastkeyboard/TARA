@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QTextBrowser, QVBoxLayout, QDialog
 from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtWidgets import QDialog, QTextBrowser, QVBoxLayout
 
 
 class HelpWindow(QDialog):

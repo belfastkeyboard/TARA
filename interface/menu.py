@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QMenu, QAction, QStyle
+from PyQt5.QtWidgets import QAction, QMainWindow, QMenu, QStyle
 
 
 class TopBarMenu(QMainWindow):

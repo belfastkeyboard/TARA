@@ -4,8 +4,8 @@ from pathlib import Path
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent
 from PyQt5.QtWidgets import QWidget
 
-from utils.handle_file import discern_type_all, discern_type_spellcheck, discern_type_scan
 from utils.error import error_dispatcher
+from utils.handle_file import discern_type_all, discern_type_scan, discern_type_spellcheck
 from utils.system import filetype_in_directory
 
 

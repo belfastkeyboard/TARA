@@ -1,10 +1,9 @@
-from PyQt5.QtWidgets import (
-    QMainWindow, QVBoxLayout, QHBoxLayout,
-    QWidget, QTabWidget, QLabel, QPushButton, QListWidget, QAbstractItemView
-)
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QAbstractItemView, QHBoxLayout, QLabel, QListWidget, QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget
+)
 
-from .util import DragNDropAll, DragNDropScan, DragNDropSpell, DictionaryType
+from .util import DictionaryType, DragNDropAll, DragNDropScan, DragNDropSpell
 
 
 class TopBarTabs(QMainWindow):
