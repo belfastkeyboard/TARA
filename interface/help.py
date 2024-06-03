@@ -40,6 +40,7 @@ class HelpWindow(QDialog):
             </li>
             </ol>
             <p>All commands work on single and multiple dictionary files.</p>
+            <p><em>Note</em>: including 'bigram' in dictionary filename will load into the bigram dictionary. The bigram dictionary considers the context of words to make more accurate predictions.</p>
             <h3>Available dictionaries</h3>
             <p><strong>Open:</strong> Opens selected dictionary in default .txt editor.</p>
             <p><strong>New:</strong> Add a new dictionary to <em>Available Dictionaries</em>.</p>
