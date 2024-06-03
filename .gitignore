@@ -244,3 +244,5 @@ fabric.properties
 
 # Directory for storing test resources
 test/
+
+*/my_dictionary.txt
