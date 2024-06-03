@@ -1,15 +1,16 @@
-import SymSpellCppPy
+import os
 import re
-
-from spellcheck.utils import _fix_encoding_errors, _prepare_text_for_analysis, _restitch_text
-from utils.status import info, good, progress
 import time
 from pathlib import Path
-from utils.system import DirectoryContents
+
+import SymSpellCppPy
+
 from utils.error import error_dispatcher
-import os
-from spellcheck.bundle import bundle_dictionaries
-from utils.system import delete
+from utils.status import info, good, progress
+from utils.system import delete, DirectoryContents
+
+from .utils import fix_encoding_errors, prepare_text_for_analysis, restitch_text
+from .bundle import bundle_dictionaries
 
 
 class Spellchecker(SymSpellCppPy.SymSpell):
@@ -82,7 +83,7 @@ class Spellchecker(SymSpellCppPy.SymSpell):
             info("Spellchecking.")
 
         start = time.time()
-        clauses, indices = _prepare_text_for_analysis(paragraph)
+        clauses, indices = prepare_text_for_analysis(paragraph)
 
         for i, clause in enumerate(clauses):
 
@@ -96,9 +97,9 @@ class Spellchecker(SymSpellCppPy.SymSpell):
             try:
                 clauses[i] = suggestion[0].term
             except UnicodeDecodeError as e:
-                clauses[i] = _fix_encoding_errors(clause, e)
+                clauses[i] = fix_encoding_errors(clause, e)
 
-        paragraph = _restitch_text(clauses, indices, paragraph)
+        paragraph = restitch_text(clauses, indices, paragraph)
         end = time.time()
 
         if log:
@@ -123,7 +124,7 @@ class Spellchecker(SymSpellCppPy.SymSpell):
         start = time.time()
 
         for i, paragraph in enumerate(paragraphs):
-            clauses, indices = _prepare_text_for_analysis(paragraph)
+            clauses, indices = prepare_text_for_analysis(paragraph)
 
             for j, clause in enumerate(clauses):
 
@@ -137,9 +138,9 @@ class Spellchecker(SymSpellCppPy.SymSpell):
                 try:
                     clauses[j] = suggestion[0].term
                 except UnicodeDecodeError as e:
-                    clauses[j] = _fix_encoding_errors(clause, e)
+                    clauses[j] = fix_encoding_errors(clause, e)
 
-            checked_paragraphs.append(_restitch_text(clauses, indices, paragraph))
+            checked_paragraphs.append(restitch_text(clauses, indices, paragraph))
 
             if log:
                 progress(

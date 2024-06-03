@@ -4,7 +4,7 @@ import os
 from PIL import Image
 from utils.error import error_dispatcher
 from OCR import ocr
-from spellcheck.spellcheck import Spellchecker
+from spellcheck import Spellchecker
 from utils.status import good
 from utils.pdf import convert_pdf
 from enum import Enum
@@ -33,7 +33,7 @@ def file_process_image(path: Path, spellcheck: bool = True) -> None:
     text = ocr.get_text(path)
 
     if spellcheck:
-        spellchecker = Spellchecker()
+        spellchecker = Spellchecker()  # TODO: convert to with/as
         text = spellchecker.spellcheck(text)
 
     document = Path(path.parent, f"{path.stem}.txt")
@@ -53,7 +53,7 @@ def file_process_text(path: Path) -> None:
         return
 
     document = Path(path.parent, f"{path.stem}_spellchecked.txt")
-    spellchecker = Spellchecker()
+    spellchecker = Spellchecker()  # TODO: convert to with/as
 
     text = read(path, True)
     text = spellchecker.spellcheck_batch(text)

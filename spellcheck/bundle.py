@@ -1,6 +1,7 @@
-from pathlib import Path
 import random
 import string
+from pathlib import Path
+
 from utils.system import read, write
 
 

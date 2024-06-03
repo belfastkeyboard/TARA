@@ -1,13 +1,13 @@
 from sys import exit
 
-from utils.status import warn, info
+from utils.status import info, warn
 
 
 def fix_byte(bad_string: str, bad_byte: str, replacement: str) -> str:
     return bad_string.replace(bad_byte, replacement)
 
 
-def _fix_encoding_errors(clause: str, exception: UnicodeDecodeError) -> str:
+def fix_encoding_errors(clause: str, exception: UnicodeDecodeError) -> str:
     if exception.reason == 'invalid continuation byte' or exception.reason == 'invalid start byte':
         invalid_byte = clause[exception.start: exception.end - 1]
         if invalid_byte == "‘":
@@ -19,7 +19,7 @@ def _fix_encoding_errors(clause: str, exception: UnicodeDecodeError) -> str:
     return clause
 
 
-def _prepare_text_for_analysis(text: str) -> tuple[list[str], list[int]]:
+def prepare_text_for_analysis(text: str) -> tuple[list[str], list[int]]:
 
     """
     Breaks text into clauses without punctuation for spellchecking.
@@ -52,7 +52,7 @@ def _prepare_text_for_analysis(text: str) -> tuple[list[str], list[int]]:
     return strings, indices
 
 
-def _restitch_text(text: list[str], indices: list[int], original_text: str) -> str:
+def restitch_text(text: list[str], indices: list[int], original_text: str) -> str:
     length = len(original_text)
     modified_text = original_text
     i = 0
