@@ -1,8 +1,8 @@
 import os
+from pathlib import Path
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtCore import QSize, Qt
-from pathlib import Path
 
 from utils.error import error_dispatcher
 from utils.system import DirectoryContents
