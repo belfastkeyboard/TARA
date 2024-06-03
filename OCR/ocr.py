@@ -1,8 +1,10 @@
-from pathlib import Path
-from PIL import Image
-from utils.status import warn, info, good, progress
-import pytesseract
 import time
+from pathlib import Path
+
+from PIL import Image
+import pytesseract
+
+from utils.status import warn, info, good, progress
 
 
 def get_text(file: Path, log: bool = True) -> str:
