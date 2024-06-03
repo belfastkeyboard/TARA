@@ -1,10 +1,11 @@
 import os
-import shutil
-from pathlib import Path, PosixPath
-from utils.status import warn, info
 import re
-from utils.error import error_dispatcher
+import shutil
 from glob import glob
+from pathlib import Path, PosixPath
+
+from utils.error import error_dispatcher
+from utils.status import info, warn
 
 
 class DirectoryContents(list):

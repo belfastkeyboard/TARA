@@ -1,13 +1,16 @@
-from PIL import Image
-import pytesseract
 import os
-from sys import exit
-from utils.system import DirectoryContents
-from utils.status import warn
-from utils.exception import EmptyDirectoryError
-from pathlib import Path
-from docx import Document
 import re
+from pathlib import Path
+from sys import exit
+
+import pytesseract
+from PIL import Image
+
+from utils.exception import EmptyDirectoryError
+from utils.status import warn
+from utils.system import DirectoryContents
+
+# TODO: add docx functionality
 
 
 def read_chars(directory: str) -> list[str]:

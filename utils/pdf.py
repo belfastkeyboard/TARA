@@ -1,13 +1,15 @@
-import pdf2image
-from PIL import Image
-from utils.system import create_new_directory, copy, is_filetype, DirectoryContents
-from utils.status import warn, info, good, progress
-from pdf2image.exceptions import PDFPopplerTimeoutError
-from sys import exit
 import os
-from utils.exception import FileTypeError
-from pathlib import Path
 import time
+from pathlib import Path
+from sys import exit
+
+import pdf2image
+from pdf2image.exceptions import PDFPopplerTimeoutError
+from PIL import Image
+
+from utils.exception import FileTypeError
+from utils.status import good, info, progress, warn
+from utils.system import is_filetype, copy, create_new_directory, DirectoryContents
 
 
 def convert_pdf(pdf: Path) -> DirectoryContents:

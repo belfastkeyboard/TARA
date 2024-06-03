@@ -1,15 +1,16 @@
+import os
+from pathlib import Path
+from statistics import median
+from sys import exit
+
 import cv2
+import numpy
 from PIL import Image
 from numpy import ndarray
-import numpy
-import os
+
 from utils.exception import EmptyDirectoryError
-from utils.status import warn, info
+from utils.status import info, warn
 from utils.system import DirectoryContents
-from statistics import median, mode
-from sys import exit
-from pathlib import Path
-import time
 
 
 class BoundingBox:
@@ -141,8 +142,6 @@ def preprocess_image(path: Path) -> tuple[ndarray, ndarray]:
     _, binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     kernel = numpy.ones((7, 7), numpy.uint16)
     binary = cv2.dilate(binary, kernel, iterations=3)
-
-
 
     return image, binary
 

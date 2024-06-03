@@ -1,13 +1,15 @@
-from pathlib import Path
-from utils.system import is_filetype, is_directory, write, read, DirectoryContents
 import os
+from enum import Enum
+from pathlib import Path
+
 from PIL import Image
-from utils.error import error_dispatcher
 from OCR import ocr
 from spellcheck import Spellchecker
-from utils.status import good
+
+from utils.error import error_dispatcher
 from utils.pdf import convert_pdf
-from enum import Enum
+from utils.status import good
+from utils.system import DirectoryContents, is_directory, is_filetype, read, write
 
 
 class ProcessType(Enum):

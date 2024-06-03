@@ -1,6 +1,7 @@
 import re
-from utils.status import warn
 from sys import exit
+
+from utils.status import warn
 
 
 def get_correct_ordinal(pattern) -> str:
