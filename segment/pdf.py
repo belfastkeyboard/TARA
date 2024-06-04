@@ -71,7 +71,6 @@ class Segment:
         self.end_time = time.time()
         good(f"Conversion completed in {(self.end_time - self.start_time):.2f}.\n")
 
-
         return
 
     def get_result(self) -> DirectoryContents:
