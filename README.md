@@ -19,6 +19,7 @@ TARA is a simple and lightweight text analysis program built to scan and spellch
   - Pass it a folder and it will work out how to process it on its own! 
 
 # To Do:
+- Pre-processing images before scan
 - Additional settings provided
 - Pickle dictionaries option (loads faster)
   - More work needed on dictionaries:
