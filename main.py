@@ -1,7 +1,7 @@
 from interface import interface_init
 
 MAJOR: int = 0
-MINOR: int = 1
+MINOR: int = 2
 PATCH: int = 0
 VERSION: str = f"{MAJOR}.{MINOR}.{PATCH}"
 NAME: str = "TARA"
