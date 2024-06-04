@@ -44,7 +44,7 @@ class OCR:
         info("Scanning.")
         self.start_time = time.time()
 
-        for file in self.files:
+        for i, file in enumerate(self.files):
             try:
                 image = Image.open(file)
             except FileNotFoundError as e:
@@ -52,9 +52,13 @@ class OCR:
                 info(f"Cannot find '{str(file)}'.")
                 return
 
-            # TODO: this function needs to return the values, not append them to the class list
             text = self.tesseract.image_to_string(image=image, config=f"--psm {self.psm}")
             self.scanned_texts.append(text)
+
+            progress(
+                text=f"Pages scanned: {i + 1} of {self.file_count}.",
+                end='' if i + 1 < self.file_count else '\r'
+            )
 
         self.end_time = time.time()
         good(f"Scanned in {(self.end_time - self.start_time):.2f} seconds.\n")
