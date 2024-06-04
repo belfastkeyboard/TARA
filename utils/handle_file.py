@@ -30,7 +30,7 @@ def file_process_image(path: Path, spellcheck: bool = True) -> None:
         return
 
     with OCR(ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
-        text = ocr.get_text([path])[0]
+        text = ocr.scan([path])[0]
 
     if spellcheck:
         with Spellchecker() as check:
@@ -89,8 +89,8 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
         images = pdf.get_result()
 
     if scan:
-        with OCR(ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
-            texts = ocr.get_text(images)
+        with OCR(images, ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
+            texts = ocr.get_text()
 
         document = Path(path.parent, path.stem, f"{path.stem}.txt")
         write('\n'.join(texts), document, 'w')

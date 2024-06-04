@@ -21,7 +21,10 @@ TARA is a simple and lightweight text analysis program built to scan and spellch
 # To Do:
 - Additional settings provided
 - Pickle dictionaries option (loads faster)
-- Multi-threading for I/O operations
+- Multi-threading for I/O operations , 
+  - Multi-threading implemented for .pdf segmentation
+  - Multi-threading doesn't appear to speed up Tesseract processing
+    - see: https://tesseract-ocr.github.io/tessdoc/FAQ#can-i-increase-speed-of-ocr 
 - Streamline process
   - Functions to add:
     - Render (pdf2img)

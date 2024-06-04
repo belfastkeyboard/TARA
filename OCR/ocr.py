@@ -1,4 +1,6 @@
 import time
+import concurrent.futures
+from math import ceil
 from pathlib import Path
 
 import pytesseract as tesseract
@@ -10,13 +12,27 @@ from .flag import ScanFlags
 
 
 class OCR:
-    def __init__(self, flags: ScanFlags, psm: int = 3):
+    def __init__(self, files: list[Path], flags: ScanFlags, psm: int = 3):
         super().__init__()
 
+        self.files = files
         self.flags = flags
 
         self.tesseract = tesseract
         self.psm = psm
+
+        self.start_time = None
+        self.end_time = None
+
+        self.file_count = len(files)
+        self.scanned_texts = list()
+
+        self.scan()
+
+        if self.flags:
+            self.post_process()
+
+        return
 
     def __enter__(self):
         return self
@@ -24,46 +40,39 @@ class OCR:
     def __exit__(self, exc_type, exc_val, exc_tb):
         return
 
-    def get_text(self, files: list[Path], log: bool = True) -> list[str]:
-        scanned_texts: list[str]
+    def scan(self):
+        info("Scanning.")
+        self.start_time = time.time()
 
-        scanned_texts = list()
-        start = time.time()
-        file_count = len(files)
-
-        if log:
-            info("Scanning.")
-
-        for i, file in enumerate(files):
-
-            if log:
-                progress(
-                    text=f"Scanning '{file.name}' {i + 1} out of {file_count}.",
-                    end='' if i + 1 < file_count else '\r'
-                )
-
+        for file in self.files:
             try:
                 image = Image.open(file)
             except FileNotFoundError as e:
                 warn(e)
                 info(f"Cannot find '{str(file)}'.")
-                exit(1)
+                return
 
-            scanned_texts.append(self.tesseract.image_to_string(image=image, config=f"--psm {self.psm}"))
+            # TODO: this function needs to return the values, not append them to the class list
+            text = self.tesseract.image_to_string(image=image, config=f"--psm {self.psm}")
+            self.scanned_texts.append(text)
 
-        end = time.time()
+        self.end_time = time.time()
+        good(f"Scanned in {(self.end_time - self.start_time):.2f} seconds.\n")
 
-        if log:
-            good(f"Scanned in {(end - start):.2f} seconds.\n")
+        return
 
+    def post_process(self):
         if self.flags & ScanFlags.SplitPage:
-            scanned_texts = self.split_page(scanned_texts)
+            self.scanned_texts = self.split_page(self.scanned_texts)
         if self.flags & ScanFlags.FixHyphenation:
-            scanned_texts = self.fix_hyphenation(scanned_texts)
+            self.scanned_texts = self.fix_hyphenation(self.scanned_texts)
         if self.flags & ScanFlags.FixNewlines:
-            scanned_texts = self.fix_newlines(scanned_texts)
+            self.scanned_texts = self.fix_newlines(self.scanned_texts)
 
-        return scanned_texts
+        return
+
+    def get_text(self) -> list[str]:
+        return self.scanned_texts
 
     @staticmethod
     def split_page(pages: list[str]) -> list[str]:
