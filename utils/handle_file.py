@@ -6,7 +6,7 @@ from OCR import OCR, ScanFlags
 from spellcheck import Spellchecker
 
 from utils.error import error_dispatcher
-from utils.pdf import convert_pdf
+from segment.pdf import Segment
 from utils.status import good
 from utils.system import DirectoryContents, is_directory, is_filetype, read, write
 
@@ -85,7 +85,8 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
         error_dispatcher.raise_error("File not found", f"Warning: file {path.name} not found.")
         return
 
-    images = convert_pdf(path)
+    with Segment(path) as pdf:
+        images = pdf.get_result()
 
     if scan:
         with OCR(ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
