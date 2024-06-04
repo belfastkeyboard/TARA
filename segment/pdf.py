@@ -1,7 +1,9 @@
 import os
 import time
+import threading
+from math import ceil
 from pathlib import Path
-from sys import exit
+from threading import Thread
 
 import pdf2image as pdf2img
 from PIL import Image
@@ -55,21 +57,43 @@ class Segment:
         return
 
     def segment(self):
+        threads: list[Thread]
+        batch: int
+
+        threads = list()
+        batch = ceil(self.page_count / 4)
+
         info("Converting .pdf to .jpgs.")
         self.start_time = time.time()
 
-        for page in range(1, self.page_count):
+        for i in range(1, self.page_count + 1, batch):
+            begin = i
+            end = min(i + batch, self.page_count + 1)
+
+            thread = threading.Thread(target=self.thread_segment, args=(begin, end))
+            threads.append(thread)
+            thread.start()
+
+        while len(os.listdir(self.img_dir)) < self.page_count:
+            progress(
+                text=f"Pages converted: {len(os.listdir(self.img_dir))} of {self.page_count}.",
+                end='' if len(os.listdir(self.img_dir)) < self.page_count else '\r'
+            )
+
+        for thread in threads:
+            thread.join()
+
+        self.end_time = time.time()
+        good(f"Conversion completed in {(self.end_time - self.start_time):.2f}.\n")
+
+        return
+
+    def thread_segment(self, begin: int, end: int):
+        for page in range(begin, end):
             image = pdf2img.convert_from_path(
                 pdf_path=self.pdf_path, timeout=20, first_page=page, last_page=page+1
             )
             self.save_image(image[0], page)
-            progress(
-                text=f"Pages converted: {page} of {self.page_count - 1}.",
-                end='' if page < self.page_count else '\r'
-            )
-
-        self.end_time = time.time()
-        good(f"Conversion completed in {(self.end_time - self.start_time):.2f}.\n")
 
         return
 
@@ -86,4 +110,4 @@ class Segment:
         return
 
     def count_page(self) -> int:
-        return pdf2img.pdfinfo_from_path(str(self.pdf_path))['Pages'] + 1
+        return pdf2img.pdfinfo_from_path(str(self.pdf_path))['Pages']
