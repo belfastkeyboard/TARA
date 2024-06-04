@@ -20,14 +20,6 @@ def get_correct_ordinal(pattern) -> str:
     return f"{str(n)}{suffix}"
 
 
-def split_page_into_paragraphs(page: str) -> list[str]:
-    return page.split('\n\n')
-
-
-def fix_newlines(paragraph: str) -> str:
-    return paragraph.replace('\n', ' ')
-
-
 def fix_ambiguous_symbol(paragraph: str) -> str:
     """
     this needs a bit of work, just run the program in debug mode with errors and check the output to see

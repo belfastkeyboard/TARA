@@ -1,79 +1,68 @@
 import time
 from pathlib import Path
 
-import pytesseract
+import pytesseract as tesseract
 from PIL import Image
 
 from utils.status import good, info, progress, warn
 
 
-def get_text(file: Path, log: bool = True) -> str:
-    """
-    Get character data from a single image.
+class OCR:
+    def __init__(self, psm: int = 3):
+        super().__init__()
 
-    Parameters
-    ----------
-    file
-        Path object pointing to directory of image to read.
-    log
-        Log activity to console. Default false.
+        self.psm = psm
+        self.tesseract = tesseract
 
+    def __enter__(self):
+        return self
 
-    Returns
-    -------
-    Pages:
-       List of pages, each page is a string.
-    """
-    if log:
-        info(f"Scanning '{file.name}'.")
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return
 
-    start = time.time()
+    def get_text(self, files: list[Path], log: bool = True) -> list[str]:
+        scanned_texts: list[str]
 
-    try:
-        image = Image.open(file)
-    except FileNotFoundError as e:
-        warn(e)
-        info(f"Cannot find file at '{file}'.")
-        exit(1)
-
-    end = time.time()
-
-    if log:
-        good(f"Scanned in {(end - start):.2f} seconds.")
-
-    return pytesseract.image_to_string(image)
-
-
-def get_text_batch(files: list[Path], log: bool = True) -> list[str]:
-    scanned_texts: list[str]
-
-    scanned_texts = list()
-    start = time.time()
-    file_count = len(files)
-
-    if log:
-        info("Scanning images.")
-
-    for i, file in enumerate(files):
+        scanned_texts = list()
+        start = time.time()
+        file_count = len(files)
 
         if log:
-            progress(
-                text=f"Scanning '{file.name}' {i + 1} out of {file_count}.",
-                end='' if i + 1 < file_count else '\r'
-            )
+            info("Scanning.")
 
-        try:
-            image = Image.open(file)
-        except FileNotFoundError as e:
-            warn(e)
-            info(f"Cannot find '{str(file)}'.")
-            exit(1)
+        for i, file in enumerate(files):
 
-        scanned_texts.append(pytesseract.image_to_string(image))
+            if log:
+                progress(
+                    text=f"Scanning '{file.name}' {i + 1} out of {file_count}.",
+                    end='' if i + 1 < file_count else '\r'
+                )
 
-    end = time.time()
+            try:
+                image = Image.open(file)
+            except FileNotFoundError as e:
+                warn(e)
+                info(f"Cannot find '{str(file)}'.")
+                exit(1)
 
-    if log:
-        good(f"Scanned in {(end - start):.2f} seconds.\n")
+            scanned_texts.append(self.tesseract.image_to_string(image=image, config=f"--psm {self.psm}"))
 
-    return scanned_texts
+        end = time.time()
+
+        if log:
+            good(f"Scanned in {(end - start):.2f} seconds.\n")
+
+        return scanned_texts
+
+    @staticmethod
+    def split_page(pages: list[str]) -> list[str]:
+        split_pages = [page.split('\n\n') for page in pages]
+        return [line for sublist in split_pages for line in sublist]
+
+    @staticmethod
+    def fix_hyphenation(paragraphs: list[str]) -> list[str]:
+        return [paragraph.replace('-\n', '') for paragraph in paragraphs]
+
+    @staticmethod
+    def fix_newlines(paragraphs: list[str]) -> list[str]:
+        return [paragraph.replace('\n', ' ') for paragraph in paragraphs]

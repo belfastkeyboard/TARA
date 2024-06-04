@@ -57,10 +57,16 @@ def restitch_text(text: list[str], indices: list[int], original_text: str) -> st
     modified_text = original_text
     i = 0
 
-    if "Mr. Williams (the clerk)" in original_text:  # the slicing is incorrect on 'James F' before 'Lalor' 'in the'...
-        pass
-
     while text:
+
+        try:
+            if i > len(original_text) + 1000:
+                raise IndexError(f"Index i: {i} out of bounds.")
+        except IndexError as e:
+            warn(e)
+            info(f"Original bounds: {len(original_text)}.")
+            warn("Aborting spellchecking, returning original text.")
+            return original_text
 
         try:
             char = modified_text[i]
@@ -82,7 +88,7 @@ def restitch_text(text: list[str], indices: list[int], original_text: str) -> st
 
             try:
                 modified_text = modified_text.replace(sliced, _should_insert_space(text[0], sliced))
-            except MemoryError as e:
+            except MemoryError as e:  # TODO: figure out why this exception is here
                 warn(e)
                 info(f"modified_text: '{modified_text}'. sliced: '{sliced}. text[0]: '{text[0]}'.")
 

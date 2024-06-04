@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 
 from PIL import Image
-from OCR import ocr
+from OCR import OCR
 from spellcheck import Spellchecker
 
 from utils.error import error_dispatcher
@@ -23,20 +23,25 @@ def file_not_accepted(path: Path) -> None:
 
 
 def file_process_image(path: Path, spellcheck: bool = True) -> None:
-    image: Image
     text: str
-    spellchecker: Spellchecker
     document: Path
 
     if not os.path.exists(path):
         error_dispatcher.raise_error("File not found", f"Warning: file {path.name} not found.")
         return
 
-    text = ocr.get_text(path)
+    with OCR() as ocr:
+        text = ocr.get_text([path])[0]
 
     if spellcheck:
-        spellchecker = Spellchecker()  # TODO: convert to with/as
-        text = spellchecker.spellcheck(text)
+        with Spellchecker() as check:
+            if not check.loaded:
+                error_dispatcher.raise_error(
+                    "No dictionaries loaded!",
+                    "No dictionaries have been loaded.\nUse the 'Dictionary' tab to load dictionaries."
+                )
+            else:
+                text = check.spellcheck(text)
 
     document = Path(path.parent, f"{path.stem}.txt")
     write(text, document, 'w')
@@ -54,12 +59,17 @@ def file_process_text(path: Path) -> None:
         error_dispatcher.raise_error("File not found", f"Warning: file {path.name} not found.")
         return
 
-    document = Path(path.parent, f"{path.stem}_spellchecked.txt")
-    spellchecker = Spellchecker()  # TODO: convert to with/as
-
     text = read(path, True)
-    text = spellchecker.spellcheck_batch(text)
+    with Spellchecker() as check:
+        if not check.loaded:
+            error_dispatcher.raise_error(
+                "No dictionaries loaded!",
+                "No dictionaries have been loaded.\nUse the 'Dictionary' tab to load dictionaries."
+            )
+        else:
+            text = check.spellcheck_batch(text)
 
+    document = Path(path.parent, f"{path.stem}_spellchecked.txt")
     write(text, document, 'w')
     good(f"Text saved as '{document.name}'.")
 
@@ -79,19 +89,26 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
     images = convert_pdf(path)
 
     if scan:
-        texts = ocr.get_text_batch(images)
+        with OCR() as ocr:
+            texts = ocr.get_text(images)
+            texts = ocr.split_page(texts)  # TODO: add options for OCR, including all these methods
+            texts = ocr.fix_hyphenation(texts)
+            texts = ocr.fix_newlines(texts)
+
+        document = Path(path.parent, path.stem, f"{path.stem}.txt")
+        write('\n'.join(texts), document, 'w')
 
         if spellcheck:
             with Spellchecker() as check:
-                if check.loaded:
-                    texts = check.spellcheck_batch(texts)
-                else:
+                if not check.loaded:
                     error_dispatcher.raise_error(
                         "No dictionaries loaded!",
                         "No dictionaries have been loaded.\nUse the 'Dictionary' tab to load dictionaries."
                     )
+                else:
+                    texts = check.spellcheck_batch(texts)
 
-        document = Path(path.parent, f"{path.stem}.txt")
+        document = Path(path.parent, path.stem, f"{path.stem} spellchecked.txt")
         write(texts, document, 'w')
         good(f"Text saved as '{document.name}'.")
     else:

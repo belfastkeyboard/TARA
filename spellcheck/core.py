@@ -12,6 +12,10 @@ from utils.system import delete, DirectoryContents
 from .utils import fix_encoding_errors, prepare_text_for_analysis, restitch_text
 from .bundle import bundle_dictionaries
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = SCRIPT_DIR.parent
+DICTIONARY_DIR = Path(PROJECT_DIR, 'dictionaries')
+
 
 class Spellchecker(SymSpellCppPy.SymSpell):
     def __init__(self) -> None:
@@ -20,7 +24,7 @@ class Spellchecker(SymSpellCppPy.SymSpell):
         self.verbosity = SymSpellCppPy.Verbosity.CLOSEST  # i don't think this is used either
 
         self.loaded = False
-        self.dictionaries = Path('dictionaries')
+        self.dictionaries = DICTIONARY_DIR
         self.temp_std_dict_path = None
         self.temp_bigram_dict_path = None
 
@@ -42,7 +46,6 @@ class Spellchecker(SymSpellCppPy.SymSpell):
         std_dict: list[str]
         bigram_dict: list[str]
 
-        # TODO: logic for loading dictionaries here, fail condition
         dictionaries = DirectoryContents([Path(self.dictionaries, item) for item in os.listdir(self.dictionaries)])
 
         if not dictionaries:
@@ -59,14 +62,14 @@ class Spellchecker(SymSpellCppPy.SymSpell):
         if std_dict:
             self.temp_std_dict_path = bundle_dictionaries([Path(item) for item in std_dict])
             self.load_dictionary(
-                corpus=self.temp_std_dict_path, term_index=0, count_index=1, separator=' '
+                corpus=str(self.temp_std_dict_path), term_index=0, count_index=1, separator=' '
             )
             self.loaded = True
 
         if bigram_dict:
             self.temp_bigram_dict_path = bundle_dictionaries([Path(item) for item in std_dict])
             self.load_bigram_dictionary(
-                corpus=self.temp_bigram_dict_path, term_index=0, count_index=2, separator=' '
+                corpus=str(self.temp_bigram_dict_path), term_index=0, count_index=2, separator=' '
             )
             self.loaded = True
 
@@ -90,7 +93,7 @@ class Spellchecker(SymSpellCppPy.SymSpell):
             if len(clause.strip()) < 2:
                 continue
 
-            suggestion = self.spellchecker.lookup_compound(
+            suggestion = self.lookup_compound(
                 input=clause, max_edit_distance=2, transfer_casing=True
             )
 
@@ -131,7 +134,7 @@ class Spellchecker(SymSpellCppPy.SymSpell):
                 if len(clause.strip()) < 2:
                     continue
 
-                suggestion = self.spellchecker.lookup_compound(
+                suggestion = self.lookup_compound(
                     input=clause, max_edit_distance=2, transfer_casing=True
                 )
 

@@ -15,6 +15,7 @@ from utils.system import is_filetype, copy, create_new_directory, DirectoryConte
 def convert_pdf(pdf: Path) -> DirectoryContents:
     images: DirectoryContents
     directory: Path
+    img_directory: Path
 
     try:
         if not os.path.exists(pdf):
@@ -26,8 +27,12 @@ def convert_pdf(pdf: Path) -> DirectoryContents:
         exit(1)
 
     directory = Path(pdf.parent, pdf.stem)
+    img_directory = Path(directory, 'images')
+
     create_new_directory(directory)
-    images = DirectoryContents(_create_jpgs_from_pdf(pdf, directory))
+    create_new_directory(img_directory)
+
+    images = DirectoryContents(_create_jpgs_from_pdf(pdf, img_directory))
     copy(pdf, directory)
 
     images.sort()
@@ -36,8 +41,8 @@ def convert_pdf(pdf: Path) -> DirectoryContents:
 
 
 # TODO: multithread this, I/O operation, can probably almost x4 this operation
-# use range to determine where to start, and increment in 4s?
-# i.e. start 1-4 (skip 4 * 3) 16-20, etc. 
+#   use range to determine where to start, and increment in 4s?
+#   i.e. start 1-4 (skip 4 * 3) 16-20, etc.
 def _create_jpgs_from_pdf(pdf: Path, directory: Path) -> list[Path]:
     batch_size: int
     page_count: int

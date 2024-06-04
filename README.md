@@ -23,6 +23,12 @@ TARA is a simple and lightweight text analysis program built to scan and spellch
 - Pickle dictionaries option (loads faster)
 - Multi-threading for I/O operations
 - Streamline process
+  - Functions to add:
+    - Render (pdf2img)
+    - Scan (Tesseract)
+    - Spellcheck (SymSpell)
+  - Scan, save to .txt, then read from .txt for spellchecking
+  - This is a more modular approach
 
 # Build
 
