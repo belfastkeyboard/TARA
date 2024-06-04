@@ -2,8 +2,7 @@ import os
 from enum import Enum
 from pathlib import Path
 
-from PIL import Image
-from OCR import OCR
+from OCR import OCR, ScanFlags
 from spellcheck import Spellchecker
 
 from utils.error import error_dispatcher
@@ -30,7 +29,7 @@ def file_process_image(path: Path, spellcheck: bool = True) -> None:
         error_dispatcher.raise_error("File not found", f"Warning: file {path.name} not found.")
         return
 
-    with OCR() as ocr:
+    with OCR(ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
         text = ocr.get_text([path])[0]
 
     if spellcheck:
@@ -89,7 +88,7 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
     images = convert_pdf(path)
 
     if scan:
-        with OCR() as ocr:
+        with OCR(ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
             texts = ocr.get_text(images)
 
         document = Path(path.parent, path.stem, f"{path.stem}.txt")

@@ -6,17 +6,17 @@ from PIL import Image
 
 from utils.status import good, info, progress, warn
 
+from .flag import ScanFlags
+
 
 class OCR:
-    def __init__(self, psm: int = 3, split_page: bool = True, fix_hyphenation: bool = True, fix_newline: bool = True):
+    def __init__(self, flags: ScanFlags, psm: int = 3):
         super().__init__()
 
-        self.tesseract = tesseract
+        self.flags = flags
 
+        self.tesseract = tesseract
         self.psm = psm
-        self.page = split_page
-        self.hyphenation = fix_hyphenation
-        self.newlines = fix_newline
 
     def __enter__(self):
         return self
@@ -56,12 +56,12 @@ class OCR:
         if log:
             good(f"Scanned in {(end - start):.2f} seconds.\n")
 
-        if self.page:
+        if self.flags & ScanFlags.SplitPage:
             scanned_texts = self.split_page(scanned_texts)
-        if self.hyphenation:
+        if self.flags & ScanFlags.FixHyphenation:
             scanned_texts = self.fix_hyphenation(scanned_texts)
-        if self.newlines:
-            scanned_texts = self.fix_newlines(scanned_texts)  # TODO: move this block into the object itself
+        if self.flags & ScanFlags.FixNewlines:
+            scanned_texts = self.fix_newlines(scanned_texts)
 
         return scanned_texts
 
