@@ -91,9 +91,6 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
     if scan:
         with OCR() as ocr:
             texts = ocr.get_text(images)
-            texts = ocr.split_page(texts)  # TODO: add options for OCR, including all these methods
-            texts = ocr.fix_hyphenation(texts)
-            texts = ocr.fix_newlines(texts)
 
         document = Path(path.parent, path.stem, f"{path.stem}.txt")
         write('\n'.join(texts), document, 'w')

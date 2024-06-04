@@ -8,11 +8,15 @@ from utils.status import good, info, progress, warn
 
 
 class OCR:
-    def __init__(self, psm: int = 3):
+    def __init__(self, psm: int = 3, split_page: bool = True, fix_hyphenation: bool = True, fix_newline: bool = True):
         super().__init__()
 
-        self.psm = psm
         self.tesseract = tesseract
+
+        self.psm = psm
+        self.page = split_page
+        self.hyphenation = fix_hyphenation
+        self.newlines = fix_newline
 
     def __enter__(self):
         return self
@@ -51,6 +55,13 @@ class OCR:
 
         if log:
             good(f"Scanned in {(end - start):.2f} seconds.\n")
+
+        if self.page:
+            scanned_texts = self.split_page(scanned_texts)
+        if self.hyphenation:
+            scanned_texts = self.fix_hyphenation(scanned_texts)
+        if self.newlines:
+            scanned_texts = self.fix_newlines(scanned_texts)  # TODO: move this block into the object itself
 
         return scanned_texts
 
