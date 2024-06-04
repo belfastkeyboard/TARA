@@ -58,9 +58,11 @@ class Segment:
 
     def segment(self):
         threads: list[Thread]
+        update: list[int]
         batch: int
 
         threads = list()
+        update = list()
         batch = ceil(self.page_count / 4)
 
         info("Converting .pdf to .jpgs.")
@@ -70,14 +72,14 @@ class Segment:
             begin = i
             end = min(i + batch, self.page_count + 1)
 
-            thread = threading.Thread(target=self.thread_segment, args=(begin, end))
+            thread = threading.Thread(target=self.thread_segment, args=(begin, end, update))
             threads.append(thread)
             thread.start()
 
-        while len(os.listdir(self.img_dir)) < self.page_count:
+        while len(update) < self.page_count:
             progress(
-                text=f"Pages converted: {len(os.listdir(self.img_dir))} of {self.page_count}.",
-                end='' if len(os.listdir(self.img_dir)) < self.page_count else '\r'
+                text=f"Pages converted: {len(update)} of {self.page_count}.",
+                end='' if len(update) < self.page_count - 1 else '\r'
             )
 
         for thread in threads:
@@ -88,12 +90,13 @@ class Segment:
 
         return
 
-    def thread_segment(self, begin: int, end: int):
+    def thread_segment(self, begin: int, end: int, update: list[int]):
         for page in range(begin, end):
             image = pdf2img.convert_from_path(
                 pdf_path=self.pdf_path, timeout=20, first_page=page, last_page=page+1
             )
             self.save_image(image[0], page)
+            update.append(page)
 
         return
 
