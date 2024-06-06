@@ -16,12 +16,8 @@ from utils.system import DirectoryContents
 
 class ImgManipFlags(IntFlag):
     NoFlags = 0
-    CannyEdgeDetection = 1 << 0
-    ContourDetection = 1 << 1
-    BoundingBoxDetection = 1 << 2
-    CropRunningHeader = 1 << 3
-
-    CropBodyText = CannyEdgeDetection | ContourDetection | BoundingBoxDetection | CropRunningHeader
+    CropRunningHeader = 1 << 1
+    CropPageNumber = 1 << 2
 
 
 class BoundingBox:

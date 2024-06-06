@@ -5,8 +5,10 @@ from pathlib import Path
 from OCR import OCR, ScanFlags
 from spellcheck import Spellchecker
 
-from utils.error import error_dispatcher
+from preprocess.image_manipulation import ImageProcessing
+from preprocess.helper import ImgManipFlags
 from segment.pdf import Segment
+from utils.error import error_dispatcher
 from utils.status import good
 from utils.system import DirectoryContents, is_directory, is_filetype, read, write
 
@@ -29,22 +31,27 @@ def file_process_image(path: Path, spellcheck: bool = True) -> None:
         error_dispatcher.raise_error("File not found", f"Warning: file {path.name} not found.")
         return
 
-    with OCR(ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
-        text = ocr.scan([path])[0]
+    # with ImageProcessing([path], ImgManipFlags.ContourDetection) as img:
+    with ImageProcessing([path], ImgManipFlags.NoFlags) as img:
+        img.save_images()
+        # img.get_memory_size()
 
-    if spellcheck:
-        with Spellchecker() as check:
-            if not check.loaded:
-                error_dispatcher.raise_error(
-                    "No dictionaries loaded!",
-                    "No dictionaries have been loaded.\nUse the 'Dictionary' tab to load dictionaries."
-                )
-            else:
-                text = check.spellcheck(text)
-
-    document = Path(path.parent, f"{path.stem}.txt")
-    write(text, document, 'w')
-    good(f"Text saved as '{document.name}'.")
+    # with OCR([path], ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
+    #     text = ocr.get_text()[0]
+    #
+    # if spellcheck:
+    #     with Spellchecker() as check:
+    #         if not check.loaded:
+    #             error_dispatcher.raise_error(
+    #                 "No dictionaries loaded!",
+    #                 "No dictionaries have been loaded.\nUse the 'Dictionary' tab to load dictionaries."
+    #             )
+    #         else:
+    #             text = check.spellcheck(text)
+    #
+    # document = Path(path.parent, f"{path.stem}.txt")
+    # write(text, document, 'w')
+    # good(f"Text saved as '{document.name}'.")
 
     return
 
@@ -88,12 +95,15 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
     with Segment(path) as pdf:
         images = pdf.get_result()
 
+    with ImageProcessing(images, ImgManipFlags.CropRunningHeader) as img:
+        img.save_images()
+
     if scan:
         with OCR(images, ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
             texts = ocr.get_text()
 
         document = Path(path.parent, path.stem, f"{path.stem}.txt")
-        write('\n'.join(texts), document, 'w')
+        write('\n\n'.join(texts), document, 'w')
 
         if spellcheck:
             with Spellchecker() as check:
@@ -106,7 +116,7 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
                     texts = check.spellcheck_batch(texts)
 
         document = Path(path.parent, path.stem, f"{path.stem} spellchecked.txt")
-        write(texts, document, 'w')
+        write('\n'.join(texts), document, 'w')
         good(f"Text saved as '{document.name}'.")
     else:
         good(f"PDF processed, files saved in '{path.stem}'.")
