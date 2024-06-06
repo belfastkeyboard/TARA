@@ -1,4 +1,5 @@
 import os
+from enum import IntFlag
 from pathlib import Path
 from statistics import median
 from sys import exit
@@ -9,8 +10,18 @@ from PIL import Image
 from numpy import ndarray
 
 from utils.exception import EmptyDirectoryError
-from utils.status import info, warn
+from utils.status import warn, info
 from utils.system import DirectoryContents
+
+
+class ImgManipFlags(IntFlag):
+    NoFlags = 0
+    CannyEdgeDetection = 1 << 0
+    ContourDetection = 1 << 1
+    BoundingBoxDetection = 1 << 2
+    CropRunningHeader = 1 << 3
+
+    CropBodyText = CannyEdgeDetection | ContourDetection | BoundingBoxDetection | CropRunningHeader
 
 
 class BoundingBox:
@@ -33,6 +44,23 @@ class BoundingBox:
 
     def __len__(self):
         return len(self.bounds)
+
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+                and self.x == other.x and self.y == other.y and self.w == other.w and self.h == other.h)
+
+    def __hash__(self):
+        return hash((self.x, self.y, self.w, self.h))
+
+    def __repr__(self):
+        return f"x: {self.x}, y: {self.y}, w: {self.w}, h: {self.h}"
+
+    def check_overlap(self, comp, dilate: int = 0):
+        return (self.x - dilate <= comp.x <= self.x + self.w + dilate
+                and self.y - dilate <= comp.y <= self.y + self.h + dilate)
+
+    def size(self) -> int:
+        return self.w * self.h
 
 
 def binarise_image(path: Path) -> None:
