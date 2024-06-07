@@ -33,7 +33,7 @@ def file_process_image(path: Path, spellcheck: bool = True) -> None:
 
     # with ImageProcessing([path], ImgManipFlags.ContourDetection) as img:
     with ImageProcessing([path], ImgManipFlags.NoFlags) as img:
-        img.save_images()
+        img.save_image()
         # img.get_memory_size()
 
     # with OCR([path], ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
@@ -96,14 +96,14 @@ def file_process_document(path: Path, scan: bool = True, spellcheck: bool = True
         images = pdf.get_result()
 
     with ImageProcessing(images, ImgManipFlags.CropRunningHeader) as img:
-        img.save_images()
+        img.process()
 
     if scan:
         with OCR(images, ScanFlags.SplitPage | ScanFlags.FixHyphenation | ScanFlags.FixNewlines) as ocr:
             texts = ocr.get_text()
 
         document = Path(path.parent, path.stem, f"{path.stem}.txt")
-        write('\n\n'.join(texts), document, 'w')
+        write('\n'.join(texts), document, 'w')
 
         if spellcheck:
             with Spellchecker() as check:

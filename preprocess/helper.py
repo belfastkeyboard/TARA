@@ -18,6 +18,7 @@ class ImgManipFlags(IntFlag):
     NoFlags = 0
     CropRunningHeader = 1 << 1
     CropPageNumber = 1 << 2
+    ResizeImage = 1 << 3
 
 
 class BoundingBox:

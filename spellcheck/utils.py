@@ -7,16 +7,18 @@ def fix_byte(bad_string: str, bad_byte: str, replacement: str) -> str:
     return bad_string.replace(bad_byte, replacement)
 
 
-def fix_encoding_errors(clause: str, exception: UnicodeDecodeError) -> str:
-    if exception.reason == 'invalid continuation byte' or exception.reason == 'invalid start byte':
-        invalid_byte = clause[exception.start: exception.end - 1]
-        if invalid_byte == "‘":
-            clause = fix_byte(bad_string=clause, bad_byte=invalid_byte, replacement="'")
-        if invalid_byte == '\x00':
-            clause = fix_byte(bad_string=clause, bad_byte=invalid_byte, replacement="")
-        if invalid_byte == '\xee':
-            clause = fix_byte(bad_string=clause, bad_byte=invalid_byte, replacement="--")
-    return clause
+def fix_encoding_errors(exc: UnicodeDecodeError) -> str:
+    byte_repr = exc.object
+    inv_byte = byte_repr[exc.start:exc.end]
+
+    byte_repr = byte_repr.replace(inv_byte, b'')
+
+    try:
+        return byte_repr.decode('utf-8')
+    except UnicodeDecodeError as e:
+        byte_repr = fix_encoding_errors(e)
+    finally:
+        return byte_repr.decode('utf-8') if isinstance(byte_repr, bytes) else byte_repr
 
 
 def prepare_text_for_analysis(text: str) -> tuple[list[str], list[int]]:

@@ -1,6 +1,5 @@
+import re
 import time
-import concurrent.futures
-from math import ceil
 from pathlib import Path
 
 import pytesseract as tesseract
@@ -66,12 +65,13 @@ class OCR:
         return
 
     def post_process(self):
-        if self.flags & ScanFlags.SplitPage:
-            self.scanned_texts = self.split_page(self.scanned_texts)
-        if self.flags & ScanFlags.FixHyphenation:
-            self.scanned_texts = self.fix_hyphenation(self.scanned_texts)
-        if self.flags & ScanFlags.FixNewlines:
-            self.scanned_texts = self.fix_newlines(self.scanned_texts)
+        texts = self.split_page(self.scanned_texts)
+        texts = self.fix_hyphenation(texts)
+        texts = self.fix_newlines(texts)
+        texts = self.fix_pre_punctuation_space(texts)
+        texts = self.fix_post_punctuation_space(texts)
+
+        self.scanned_texts = texts
 
         return
 
@@ -79,9 +79,9 @@ class OCR:
         return self.scanned_texts
 
     @staticmethod
-    def split_page(pages: list[str]) -> list[str]:
-        split_pages = [page.split('\n\n') for page in pages]
-        return [line for sublist in split_pages for line in sublist]
+    def split_page(text: list[str]) -> list[str]:
+        split_pages = [page.split('\n\n') for page in text]
+        return [page for pages in split_pages for page in pages]
 
     @staticmethod
     def fix_hyphenation(paragraphs: list[str]) -> list[str]:
@@ -90,3 +90,11 @@ class OCR:
     @staticmethod
     def fix_newlines(paragraphs: list[str]) -> list[str]:
         return [paragraph.replace('\n', ' ') for paragraph in paragraphs]
+
+    @staticmethod
+    def fix_pre_punctuation_space(paragraphs: list[str]) -> list[str]:
+        return [re.sub(r'\b ([”;])', r'\1', paragraph) for paragraph in paragraphs]
+
+    @staticmethod
+    def fix_post_punctuation_space(paragraphs: list[str]) -> list[str]:
+        return [re.sub(r'“ \b', r'“', paragraph) for paragraph in paragraphs]

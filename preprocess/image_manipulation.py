@@ -31,7 +31,6 @@ class ImageProcessing:
     def __init__(self, files: list[Path], flags: ImgManipFlags):
         self.files = files
         self.images = list()
-        # self.images = list([cv2.imread(str(file)) for file in self.files])
 
         self.flags = flags
         self.image_count = len(self.files)
@@ -39,14 +38,55 @@ class ImageProcessing:
         self.start = None
         self.end = None
 
-        self.crop()
-
         return
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        return
+
+    def process(self):
+        assert self.files, "No files in ImageProcessing.files"
+
+        info(f"Processing image{'s' if len(self.images) > 1 else ''}.")
+        self.start = time.time()
+
+        for i, file in enumerate(self.files):
+            img = cv2.imread(str(file))
+
+            if self.flags & ImgManipFlags.ResizeImage:
+                img = self.resize(img)
+
+            edit_img = self.get_edges(img)
+            contours = self.get_contours(edit_img)
+            bounding = self.get_likely_components(contours)
+
+            if not bounding:
+                progress(
+                    text=f"Images processed: {i + 1}  out of {self.image_count}.",
+                    end='' if i + 1 < self.image_count else '\r'
+                )
+                continue
+
+            if self.flags & ImgManipFlags.CropRunningHeader:
+                bounding = self.crop_running_header(img, bounding)
+            if self.flags & ImgManipFlags.CropPageNumber:
+                bounding = self.crop_page_number(img, bounding)
+
+            region = self.get_text_region(bounding)
+
+            img = img[region.y:region.y + region.h, region.x:region.x + region.w]
+            self.save_image(file, img)
+
+            progress(
+                text=f"Images processed: {i + 1}  out of {self.image_count}.",
+                end='' if i + 1 < self.image_count else '\r'
+             )
+
+        self.end = time.time()
+        good(f"Image processing complete in {self.end - self.start} seconds.\n")
+
         return
 
     @staticmethod
@@ -150,50 +190,22 @@ class ImageProcessing:
 
         return BoundingBox((x, y, w - x, h - y))
 
-    def crop(self):
-        # assert self.images, "No images in ImageProcessing.images"
-        assert self.files, "No files in ImageProcessing.files"
+    # this method currently makes tesseract less accurate by resizing
+    @staticmethod
+    def resize(img: image, w: int = 6, h: int = 9) -> image:
+        # width = w * 200
+        # height = h * 200
 
-        info(f"Processing image{'s' if len(self.images) > 1 else ''}.")
-        self.start = time.time()
+        # img_width = img.shape[0]
+        # img_height = img.shape[1]
 
-        # for i, img in enumerate(self.images):
-        for i, file in enumerate(self.files):
-            img = cv2.imread(str(file))
+        resize = img
 
-            edit_img = self.get_edges(img)
-            contours = self.get_contours(edit_img)
-            bounding = self.get_likely_components(contours)
+        # if img_width < width or img_height < height:
+        #     resize = cv2.resize(img, (width, height), interpolation=cv2.INTER_LINEAR)
 
-            if not bounding:
-                progress(
-                    text=f"Images processed: {i + 1}  out of {self.image_count}.",
-                    end='' if i + 1 < self.image_count else '\r'
-                )
-                continue
+        return resize
 
-            if self.flags & ImgManipFlags.CropRunningHeader:
-                bounding = self.crop_running_header(img, bounding)
-            if self.flags & ImgManipFlags.CropPageNumber:
-                bounding = self.crop_page_number(img, bounding)
-
-            region = self.get_text_region(bounding)
-
-            img = img[region.y:region.y + region.h, region.x:region.x + region.w]
-            self.images.append(img)
-
-            progress(
-                text=f"Images processed: {i + 1}  out of {self.image_count}.",
-                end='' if i + 1 < self.image_count else '\r'
-             )
-
-        self.end = time.time()
-        good(f"Image processing complete in {self.end - self.start} seconds.\n")
-
-        return
-
-    def save_images(self):
-        assert self.images, "No images in ImageProcessing.images"
-
-        for file, img in zip(self.files, self.images):
-            cv2.imwrite(f"{str(file)}", img)
+    @staticmethod
+    def save_image(file: Path, img: image):
+        cv2.imwrite(f"{str(file)}", img)

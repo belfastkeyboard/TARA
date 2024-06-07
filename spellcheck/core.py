@@ -6,7 +6,7 @@ from pathlib import Path
 import SymSpellCppPy
 
 from utils.error import error_dispatcher
-from utils.status import info, good, progress
+from utils.status import info, good, progress, warn
 from utils.system import delete, DirectoryContents
 
 from .utils import fix_encoding_errors, prepare_text_for_analysis, restitch_text
@@ -17,6 +17,9 @@ PROJECT_DIR = SCRIPT_DIR.parent
 DICTIONARY_DIR = Path(PROJECT_DIR, 'dictionaries')
 
 
+# TODO: merge spellcheck and spellcheck_batch into one function
+#   like segment object, have it run the spellcheck in the init
+#   then have one function for retrieving the result
 class Spellchecker(SymSpellCppPy.SymSpell):
     def __init__(self) -> None:
         super().__init__()
@@ -25,7 +28,7 @@ class Spellchecker(SymSpellCppPy.SymSpell):
 
         self.loaded = False
         self.dictionaries = DICTIONARY_DIR
-        self.temp_std_dict_path = None
+        self.temp_std_dict_path = None  # TODO: shift these over to the /tmp path
         self.temp_bigram_dict_path = None
 
         self.load_dictionaries()
@@ -110,7 +113,7 @@ class Spellchecker(SymSpellCppPy.SymSpell):
 
         return paragraph
 
-    def spellcheck_batch(self, paragraphs: list[str], log: bool = True) -> list[str]:
+    def spellcheck_batch(self, paragraphs: list[str]) -> list[str]:
 
         """ lookup compound with bigram dictionary seems to be much better at getting the correct word
             but it simply doesn't get it right all the time. it would probably be good to build an irish
@@ -119,14 +122,16 @@ class Spellchecker(SymSpellCppPy.SymSpell):
 
         checked_paragraphs: list[str]
 
-        if log:
-            info("Spellchecking.")
+        info("Spellchecking.")
 
         checked_paragraphs = list()
         paragraph_count = len(paragraphs)
         start = time.time()
 
         for i, paragraph in enumerate(paragraphs):
+            if "Digitized by mel Archive" in paragraph:
+                pass
+
             clauses, indices = prepare_text_for_analysis(paragraph)
 
             for j, clause in enumerate(clauses):
@@ -140,20 +145,21 @@ class Spellchecker(SymSpellCppPy.SymSpell):
 
                 try:
                     clauses[j] = suggestion[0].term
-                except UnicodeDecodeError as e:
-                    clauses[j] = fix_encoding_errors(clause, e)
+                except UnicodeEncodeError as e:
+                    warn(e)
+                    continue
+                except UnicodeDecodeError as exc:
+                    clauses[j] = fix_encoding_errors(exc)
 
             checked_paragraphs.append(restitch_text(clauses, indices, paragraph))
 
-            if log:
-                progress(
-                    f"Spellchecked paragraphs: {i + 1} out of {paragraph_count}.",
-                    end='' if i + 1 < paragraph_count else '\r'
-                )
+            progress(
+                f"Spellchecked paragraphs: {i + 1} out of {paragraph_count}.",
+                end='' if i + 1 < paragraph_count else '\r'
+            )
 
         end = time.time()
 
-        if log:
-            good(f"Spellchecked in {(end - start):.2f} seconds.\n")
+        good(f"Spellchecked in {(end - start):.2f} seconds.\n")
 
         return checked_paragraphs
